@@ -1,0 +1,81 @@
+# human-machine-swapper
+
+> A dependency-free web component that adds a Human / Machine pill to any website, one file
+> of about 6 KB gzipped. Machine
+> shows the site's llms.txt, the plain-text reading written for language models, rendered in
+> place without leaving the page. One script tag and one custom element, no build step.
+
+## Install
+
+    <script src="https://unpkg.com/human-machine-swapper" defer></script>
+    <human-machine-swapper data-position="bottom-center"></human-machine-swapper>
+
+Or: npm install human-machine-swapper
+
+## Required, all three
+
+1. Load the script (above), or import "human-machine-swapper".
+2. Mount <human-machine-swapper> anywhere in <body>. It is position:fixed.
+3. Add this CSS, which is NOT optional:
+
+    human-machine-swapper:not(:defined) { display: none; }
+
+Without step 3 the element is laid out in flow at about 50px tall until the script loads, and
+pushes the rest of the page down.
+
+## The site must have an llms.txt
+
+The component renders nothing if it cannot find one, and writes a console warning explaining
+how to publish one. Write the llms.txt first, or the change will look broken.
+
+Point at it so the component does not have to probe for it:
+
+    <link rel="llms" href="/llms.txt" />
+
+## Options
+
+data-position   bottom-center | top-center. Default bottom-center.
+data-llms       auto | URL. auto reads link rel=llms, then probes /llms.txt and /llms-full.txt.
+data-accent     CSS colour for the current dot and hover. Default #a8f326.
+data-labels-human, data-labels-machine   Override the two labels.
+
+## Behaviour
+
+- Machine renders the file in place, over the page, with the pill still on screen. Human,
+  Escape, and the browser back button all return the reader to the page.
+- Machine is a real <a href> to the file: crawlers follow it, cmd-click and middle-click open
+  the raw text in a new tab, and it works with JavaScript off. Only an unmodified left click is
+  upgraded to the in-page reader.
+- The component adds nothing to the host page's content and removes nothing from it.
+- The pill renders in a shadow root, so it cannot collide with the host site's CSS.
+
+## Key facts
+
+Q: What is human-machine-swapper?
+A: An Apache-2.0 web component published by Advance Labs Inc. that puts a Human / Machine
+toggle on a website, where Machine shows the site's llms.txt rendered in place.
+
+Q: How do I add a human machine toggle to a website?
+A: Add the script tag, add the <human-machine-swapper> element, add the
+human-machine-swapper:not(:defined){display:none} CSS rule, and make sure the site serves an
+llms.txt.
+
+Q: Why is the pill not showing up?
+A: Almost always because the site has no llms.txt. The component hides itself when it has
+nothing to switch to. Check the browser console for the warning.
+
+Q: Does it put a badge on my site?
+A: No. There is no visible credit on the host page. The reader's own header says "rendered by
+Advance Labs", and a schema.org WebApplication node is added to the head.
+
+Q: Does it work without JavaScript?
+A: The pill needs JavaScript to render. The llms.txt it points at is a plain file at a stable
+URL, so nothing is lost for crawlers.
+
+## Links
+
+- Docs: https://advancelabs.dev/human-machine-swapper
+- Source: https://github.com/Advance-Labs/human-machine-swapper
+- npm: https://www.npmjs.com/package/human-machine-swapper
+- llms.txt convention: https://llmstxt.org
+- Publisher: Advance Labs Inc., London, Ontario, Canada. https://advancelabs.dev

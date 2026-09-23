@@ -1,0 +1,238 @@
+# Human/Machine view
+
+A web component that puts a **Human / Machine** pill on any website. Machine shows the site's
+`llms.txt` — the plain-text reading written for language models — rendered in place, without
+leaving the page. One file, about 6 KB gzipped.
+
+No dependencies. No build step. No sign-up. Works on any stack, because it is one script tag
+and one custom element.
+
+```html
+<script src="https://unpkg.com/human-machine-swapper" defer></script>
+<human-machine-swapper data-position="bottom-center"></human-machine-swapper>
+```
+
+---
+
+## Install
+
+### Script tag
+
+```html
+<script src="https://unpkg.com/human-machine-swapper" defer></script>
+```
+
+Or pin a version: `https://unpkg.com/human-machine-swapper@1.0.0`.
+
+### npm
+
+```bash
+npm install human-machine-swapper
+```
+
+```js
+import "human-machine-swapper";
+```
+
+---
+
+## Required setup
+
+Three things. Skip any one of them and the pill will not appear, or will appear broken.
+
+### 1. Publish an `llms.txt`
+
+The component's only job is to hand a reader the machine reading of your site. **If you do not
+have one, the pill does not render** and the console explains why.
+
+Put a plain-text file at `/llms.txt`. A minimal one:
+
+```
+# Your Company
+
+> One sentence on what you do.
+
+## About
+
+Two or three paragraphs a model can quote.
+
+## Key facts
+
+Q: What does Your Company do?
+A: ...
+```
+
+See <https://llmstxt.org> for the convention.
+
+### 2. Point at it
+
+```html
+<link rel="llms" href="/llms.txt" />
+```
+
+Optional but recommended. Without it the component probes `/llms.txt` then `/llms-full.txt`,
+which costs one `HEAD` request on first load (cached per tab afterwards).
+
+### 3. Add the `:defined` guard
+
+```css
+human-machine-swapper:not(:defined) {
+  display: none;
+}
+```
+
+**This one is not optional.** Until the script loads, the browser treats
+`<human-machine-swapper>` as an unknown element and lays it out in normal flow, where it
+measures about 50px tall and pushes whatever follows it down the page. On a slow connection
+that is a visible jump; on a fixed-height layout it is broken geometry. A page cannot be styled
+by a script that has not loaded yet, so this is the one thing the component cannot do for
+itself.
+
+---
+
+## Framework snippets
+
+### Plain HTML
+
+```html
+<!doctype html>
+<html>
+  <head>
+    <link rel="llms" href="/llms.txt" />
+    <style>
+      human-machine-swapper:not(:defined) {
+        display: none;
+      }
+    </style>
+    <script src="https://unpkg.com/human-machine-swapper" defer></script>
+  </head>
+  <body>
+    <!-- your page -->
+    <human-machine-swapper data-position="bottom-center"></human-machine-swapper>
+  </body>
+</html>
+```
+
+### Next.js (App Router)
+
+`app/layout.js`:
+
+```jsx
+import Script from "next/script";
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <head>
+        <link rel="llms" href="/llms.txt" />
+      </head>
+      <body>
+        {children}
+        <human-machine-swapper data-position="bottom-center" />
+        <Script src="https://unpkg.com/human-machine-swapper" strategy="afterInteractive" />
+      </body>
+    </html>
+  );
+}
+```
+
+`app/globals.css`:
+
+```css
+human-machine-swapper:not(:defined) {
+  display: none;
+}
+```
+
+Put `llms.txt` in `public/`.
+
+### Astro
+
+```astro
+---
+---
+<link rel="llms" href="/llms.txt" slot="head" />
+<human-machine-swapper data-position="bottom-center"></human-machine-swapper>
+<script src="https://unpkg.com/human-machine-swapper"></script>
+<style is:global>
+  human-machine-swapper:not(:defined) { display: none; }
+</style>
+```
+
+### WordPress
+
+Add to your theme's `footer.php` before `</body>`, and the CSS to Customizer → Additional CSS.
+
+---
+
+## Options
+
+| Attribute | Value | What it does |
+| --- | --- | --- |
+| `data-position` | `bottom-center` \| `top-center` | Where the pill sits, fixed to the viewport. Default `bottom-center`. |
+| `data-llms` | `auto` \| URL | The machine reading to show. `auto` reads `link rel="llms"`, then probes `/llms.txt` and `/llms-full.txt`. |
+| `data-accent` | CSS color | Accent for the current dot and hover. Default `#a8f326`. |
+| `data-labels-human` | text | Override the Human label. |
+| `data-labels-machine` | text | Override the Machine label. |
+
+---
+
+## How it behaves
+
+- **Machine renders in place.** The file is fetched and shown over the page, with the pill still
+  on screen. Human, <kbd>Escape</kbd>, or the browser's back button all return you.
+- **Machine is a real link.** It is an `<a href>` pointing at the file, so crawlers follow it,
+  cmd-click and middle-click open the raw text in a new tab, and it works with JavaScript off.
+  Only an unmodified left click is upgraded to the in-page reader.
+- **It hides itself when it has nothing to show.** No `llms.txt` means no pill, plus a console
+  warning telling you how to publish one. A visible control that does nothing is worse than no
+  control.
+- **It never touches your content.** The component adds nothing to your page and removes
+  nothing from it. Everything a crawler sees is what you already shipped.
+- **Shadow DOM.** The pill renders in a closed-off shadow root, so it cannot collide with your
+  CSS and your CSS cannot collide with it.
+
+---
+
+## Why this exists
+
+Sites increasingly publish two readings: one for people, one for models. The second is usually
+an `llms.txt` at a URL nobody guesses and nothing links to. This makes it one click away, and
+tells a visitor it exists.
+
+Built by [Advance Labs](https://advancelabs.dev). The reader's header credits us; there is no
+badge on your page.
+
+---
+
+## Pinning and integrity
+
+`https://unpkg.com/human-machine-swapper` always serves the latest release, which means you get
+fixes automatically and you are trusting the CDN. If you would rather pin, use an exact version
+and a Subresource Integrity hash:
+
+```html
+<script
+  src="https://unpkg.com/human-machine-swapper@1.0.0/src/human-machine-swapper.js"
+  integrity="sha384-REPLACE_WITH_THE_HASH_FOR_THIS_VERSION"
+  crossorigin="anonymous"
+  defer
+></script>
+```
+
+Generate the hash yourself, so you are trusting the bytes you checked rather than our word:
+
+```bash
+curl -s https://unpkg.com/human-machine-swapper@1.0.0/src/human-machine-swapper.js \
+  | openssl dgst -sha384 -binary | openssl base64 -A
+```
+
+A pinned build does not update, so you take on watching for releases. Self-hosting the file is
+the third option and works identically: it is one dependency-free script with no network calls
+of its own beyond reading your `llms.txt`.
+
+---
+
+## Licence
+
+Apache-2.0.
