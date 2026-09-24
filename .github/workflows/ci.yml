@@ -14,3 +14,22 @@ jobs:
         with:
           node-version: 20
       - run: npm test
+
+  wordpress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          coverage: none
+      # 7.4 is the plugin's declared floor, so lint at the floor: syntax that is fine on 8.x
+      # and fatal on 7.4 is exactly the failure a WordPress user would hit and we would not.
+      - name: Lint at the declared PHP floor
+        run: |
+          for f in $(find wordpress -name '*.php'); do
+            php -l "$f"
+          done
+      # Linting proves it parses. This proves the generator produces a sensible machine
+      # reading, against a thin stub of WordPress.
+      - run: php wordpress/test/generator-test.php
