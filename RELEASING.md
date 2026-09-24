@@ -39,6 +39,37 @@ easy to miss):
 | Workflow filename | `release.yml` |
 | Environment name | *(blank)* |
 
+## Two packages, one repo
+
+The tag picks the target:
+
+| Tag | Publishes |
+| --- | --- |
+| `v1.2.0` | `human-machine-swapper` (repo root) |
+| `create-v1.0.0` | `create-llms-txt` (`create-llms-txt/`) |
+
+Each package needs **its own** trusted publisher entry on npmjs.com, both pointing at this
+repo and `release.yml`.
+
+## Trusted publishing cannot do a FIRST publish
+
+Confirmed by trying it, because npm's docs do not say. Tagging `create-v1.0.0` for a package
+that did not exist yet failed with:
+
+```
+npm error 404 Not Found - PUT https://registry.npmjs.org/create-llms-txt
+```
+
+There is no package for npm to match a trusted publisher against, and with no token in the
+workflow there is no other credential. So the sequence for any NEW package is:
+
+1. `npm login` in a real terminal, then `npm publish` from that package's directory, once.
+2. Configure its trusted publisher on npmjs.com.
+3. Every release after that is a tag, with no credential anywhere.
+
+Do not paste a publish token into a chat window to shortcut step 1. That is how this
+project's first token ended up disclosed and needing revocation.
+
 ## Trusted publishing needs Node ≥ 22.14.0 and npm ≥ 11.5.1
 
 Node 20 fails **both** — it ships npm 10, which has never heard of OIDC. The failure surfaces
