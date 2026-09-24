@@ -86,6 +86,29 @@ function hmv_query_vars( $vars ) {
 	return $vars;
 }
 
+add_filter( 'redirect_canonical', 'hmv_no_canonical_redirect', 10, 2 );
+/**
+ * Stops WordPress bouncing /llms.txt to /llms.txt/.
+ *
+ * With a trailing-slash permalink structure, redirect_canonical treats our route like any
+ * other and 301s it to a slashed URL. llms.txt is a FILE path by convention: every tool
+ * asks for /llms.txt, including this project's own component. Most clients follow the 301
+ * and it works by luck, which is exactly the kind of thing that breaks against a fetcher
+ * that does not.
+ *
+ * Caught by running the plugin in a real WordPress rather than by reading the code.
+ *
+ * @param string|false $redirect The URL WordPress wants to redirect to.
+ * @param string       $requested The requested URL.
+ * @return string|false
+ */
+function hmv_no_canonical_redirect( $redirect, $requested ) {
+	if ( get_query_var( 'hmv_llms' ) ) {
+		return false;
+	}
+	return $redirect;
+}
+
 add_action( 'template_redirect', 'hmv_maybe_serve_llms' );
 /** Answers /llms.txt as plain text, or gets out of the way. */
 function hmv_maybe_serve_llms() {
