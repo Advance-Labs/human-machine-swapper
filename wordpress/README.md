@@ -75,8 +75,23 @@ human review queue, then SVN rather than git. In order:
 
 1. Submit the plugin for review at <https://wordpress.org/plugins/developers/add/>.
 2. Wait for the reviewer. Expect a round of feedback.
-3. On approval you get an SVN repo. `trunk/` gets the plugin, `tags/1.0.0/` the release,
-   `assets/` the screenshots and banner.
+3. On approval they create the SVN repo and email you the URL. Then:
+
+   ```bash
+   ./wordpress/publish-svn.sh 1.0.0
+   ```
+
+**You cannot create the SVN repo yourself.** It does not exist until the plugin is approved:
+
+```
+$ svn info https://plugins.svn.wordpress.org/human-machine-view
+svn: warning: W170000: URL non-existent in revision 3711943
+```
+
+The script refuses to run if the plugin header and `readme.txt`'s `Stable tag` disagree with
+the version you asked for. **`Stable tag` is what WordPress actually serves**, not `trunk`,
+so a mismatch ships the wrong code under the right number. It also refuses to overwrite an
+existing tag, because versions on WordPress.org are immutable.
 
 The `readme.txt` matters more than it looks: it is the listing copy **and** the text the
 directory's own search indexes, so it is written for somebody typing "llms.txt" or "AI
