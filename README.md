@@ -288,6 +288,11 @@ of its own beyond reading your `llms.txt`.
 
 ---
 
+## Contributing
+
+Releases are cut by pushing a tag; see [RELEASING.md](RELEASING.md). There is no npm token —
+publishing uses trusted publishing, and every release carries a provenance attestation.
+
 ## Licence
 
 Apache-2.0.
