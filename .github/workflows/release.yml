@@ -2,12 +2,22 @@ name: release
 
 # Publishes to npm when a vX.Y.Z tag is pushed. The tag must match the version in
 # package.json, so a release cannot silently ship a different version than it claims.
+#
+# Authentication is npm Trusted Publishing (OIDC): the job proves it is this workflow, in
+# this repo, and npm mints a short-lived credential for it. There is no NPM_TOKEN. That is
+# the point - a publish token is a long-lived secret that works from anywhere, and the one
+# this package started with was disclosed in plain text. It cannot be disclosed if it does
+# not exist.
+#
+# Trusted publishing also attaches a provenance attestation to the release, so anyone can
+# verify which commit and workflow produced the tarball: npm audit signatures.
 on:
   push:
     tags: ["v*"]
 
 permissions:
   contents: read
+  # What lets the job request the OIDC token npm trades for publish rights.
   id-token: write
 
 jobs:
@@ -19,7 +29,26 @@ jobs:
         with:
           node-version: 20
           registry-url: https://registry.npmjs.org
+
+      # Node 20 ships npm 10, which has no idea what trusted publishing is. Left alone it
+      # would look for a token, find none, and fail with an auth error that says nothing
+      # about the real cause.
+      - name: npm new enough for trusted publishing
+        run: |
+          npm install -g npm@latest
+          NPM_V="$(npm --version)"
+          echo "npm $NPM_V"
+          node -e '
+            const [maj, min, patch] = process.argv[1].split(".").map(Number);
+            const ok = maj > 11 || (maj === 11 && (min > 5 || (min === 5 && patch >= 1)));
+            if (!ok) {
+              console.error(`::error::npm ${process.argv[1]} cannot use trusted publishing; needs >= 11.5.1`);
+              process.exit(1);
+            }
+          ' "$NPM_V"
+
       - run: npm test
+
       - name: Tag and package.json must agree
         run: |
           TAG="${GITHUB_REF_NAME#v}"
@@ -28,6 +57,26 @@ jobs:
             echo "::error::tag v$TAG does not match package.json $PKG"
             exit 1
           fi
+
+      # No NODE_AUTH_TOKEN. If this line ever needs one again, trusted publishing has been
+      # turned off on npmjs.com and that is the thing to fix, not this file.
       - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # A green publish step is not proof the release is fetchable: npm answers before the
+      # registry serves it ("your package is being processed"). And provenance is what shows
+      # the publish really came from this workflow rather than from somebody's token.
+      - name: Confirm the registry actually has it, with provenance
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          for i in $(seq 1 30); do
+            if npm view "human-machine-swapper@$VERSION" version >/dev/null 2>&1; then
+              echo "registry is serving $VERSION"
+              npm view "human-machine-swapper@$VERSION" dist.attestations \
+                || echo "::warning::no attestation reported for $VERSION"
+              exit 0
+            fi
+            echo "waiting for the registry to serve $VERSION ($i)"
+            sleep 10
+          done
+          echo "::error::published, but the registry never served $VERSION"
+          exit 1
