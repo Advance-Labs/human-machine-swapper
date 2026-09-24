@@ -1,6 +1,6 @@
 {
   "name": "create-llms-txt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Write an llms.txt for your site in one command. Reads your routes, so the file lists what is actually on the site. Optionally adds a Human/Machine pill so visitors can read it too.",
   "keywords": [
     "llms.txt",
@@ -38,7 +38,7 @@
     "README.md"
   ],
   "dependencies": {
-    "human-machine-swapper": "^1.2.0"
+    "human-machine-swapper": "^1.4.0"
   },
   "engines": {
     "node": ">=18"
