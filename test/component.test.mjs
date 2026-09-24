@@ -82,3 +82,33 @@ test("the published tarball carries the files an agent reads", () => {
     assert.ok(PKG.files.includes(f), `${f} is missing from package.json files`);
   }
 });
+
+/**
+ * The Custom Elements Manifest is what webcomponents.org indexes and what an IDE reads for
+ * autocomplete. A manifest that drifts from the component is worse than none: it documents
+ * attributes that do nothing, in the one place a tool trusts without checking.
+ */
+test("the custom elements manifest matches the component", () => {
+  const manifest = JSON.parse(readFileSync(join(ROOT, "custom-elements.json"), "utf8"));
+  const decl = manifest.modules[0].declarations[0];
+
+  assert.equal(decl.tagName, "human-machine-swapper");
+  assert.equal(manifest.modules[0].path, PKG.main, "manifest path must match the entry point");
+
+  // Every attribute the manifest advertises must actually be read by the source.
+  for (const attr of decl.attributes) {
+    assert.ok(
+      SOURCE.includes(`"${attr.name}"`),
+      `manifest advertises ${attr.name}, which the component never reads`
+    );
+  }
+  // And every custom property it documents must be used.
+  for (const prop of decl.cssProperties) {
+    assert.ok(SOURCE.includes(prop.name), `manifest documents ${prop.name}, unused in source`);
+  }
+});
+
+test("package.json points at the manifest and ships it", () => {
+  assert.equal(PKG.customElements, "custom-elements.json");
+  assert.ok(PKG.files.includes("custom-elements.json"));
+});

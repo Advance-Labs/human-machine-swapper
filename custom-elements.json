@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "2.1.0",
+  "readme": "README.md",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/human-machine-swapper.js",
+      "declarations": [
+        {
+          "kind": "class",
+          "customElement": true,
+          "tagName": "human-machine-swapper",
+          "name": "HumanMachineSwapper",
+          "description": "A Human / Machine pill. Machine shows the site's llms.txt, the plain-text reading written for language models, rendered in place over the page. Renders nothing at all when the site has no llms.txt to offer.",
+          "attributes": [
+            {
+              "name": "data-position",
+              "description": "Which edge the pill is fixed to.",
+              "type": { "text": "'bottom-center' | 'top-center'" },
+              "default": "'bottom-center'"
+            },
+            {
+              "name": "data-llms",
+              "description": "The machine reading to link to. 'auto' reads <link rel=\"llms\">, then probes /llms.txt and /llms-full.txt. When nothing answers, the component renders nothing and explains why in the console.",
+              "type": { "text": "'auto' | string" },
+              "default": "'auto'"
+            },
+            {
+              "name": "data-accent",
+              "description": "Accent colour for the current dot and hover state.",
+              "type": { "text": "string" },
+              "default": "'#a8f326'"
+            },
+            {
+              "name": "data-labels-human",
+              "description": "Overrides the Human label.",
+              "type": { "text": "string" },
+              "default": "'Human'"
+            },
+            {
+              "name": "data-labels-machine",
+              "description": "Overrides the Machine label.",
+              "type": { "text": "string" },
+              "default": "'Machine'"
+            }
+          ],
+          "cssProperties": [
+            {
+              "name": "--hms-top",
+              "description": "Distance from the top edge. Set this AND --hms-bottom together when overriding: a fixed box with both set and height auto stretches. Use when the site's own chrome occupies the default edge.",
+              "default": "calc(14px + env(safe-area-inset-top)) when data-position is top-center, otherwise auto"
+            },
+            {
+              "name": "--hms-bottom",
+              "description": "Distance from the bottom edge. See --hms-top.",
+              "default": "calc(20px + env(safe-area-inset-bottom)) when data-position is bottom-center, otherwise auto"
+            }
+          ],
+          "members": [],
+          "events": []
+        }
+      ],
+      "exports": [
+        {
+          "kind": "custom-element-definition",
+          "name": "human-machine-swapper",
+          "declaration": {
+            "name": "HumanMachineSwapper",
+            "module": "src/human-machine-swapper.js"
+          }
+        }
+      ]
+    }
+  ]
+}
