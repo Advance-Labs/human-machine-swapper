@@ -22,6 +22,11 @@ and one custom element.
 npx human-machine-swapper init
 ```
 
+> Only here for the `llms.txt` and not the pill? [`npm create llms-txt`](https://www.npmjs.com/package/create-llms-txt)
+> writes the file from your routes and offers the pill at the end. Same code, different
+> front door.
+
+
 Detects your framework, writes a starter `llms.txt` if you have none, declares it, loads the
 component **pinned to a version with an integrity hash**, mounts the element, and adds the
 `:not(:defined)` guard below. Idempotent, never overwrites an existing `llms.txt`, and

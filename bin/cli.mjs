@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import { detect, readSiteFacts } from "../src/init/detect.mjs";
 import { buildLlmsTxt, countTodos } from "../src/init/llms.mjs";
+import { findPages } from "../src/init/pages.mjs";
 import { apply, buildScriptTag, isJsxLayout, ELEMENT_TAG, LINK_TAG, CSS_GUARD } from "../src/init/apply.mjs";
 
 /**
@@ -117,7 +118,8 @@ Then make sure the site serves an llms.txt. Full docs: ${DOCS}`);
   }
 
   const facts = readSiteFacts(args.dir);
-  const llmsTxt = buildLlmsTxt(facts, { framework: framework.name });
+  const pages = findPages(args.dir, framework);
+  const llmsTxt = buildLlmsTxt(facts, { framework: framework.name, pages });
   const scriptTag = buildScriptTag({
     version: PKG.version,
     integrity: integrityOfSelf(),
@@ -125,7 +127,8 @@ Then make sure the site serves an llms.txt. Full docs: ${DOCS}`);
     jsx: isJsxLayout(framework.layout),
   });
 
-  console.log(`\n${C.b}${framework.name}${C.x}${args.dryRun ? `  ${C.y}(dry run, nothing written)${C.x}` : ""}\n`);
+  const pageNote = pages.length ? `  ${C.dim}${pages.length} page${pages.length === 1 ? "" : "s"} read${C.x}` : "";
+  console.log(`\n${C.b}${framework.name}${C.x}${pageNote}${args.dryRun ? `  ${C.y}(dry run, nothing written)${C.x}` : ""}\n`);
 
   const { actions, wrote } = apply({ dir: args.dir, framework, llmsTxt, scriptTag, dryRun: args.dryRun });
   report(actions);

@@ -13,7 +13,8 @@ name: release
 # verify which commit and workflow produced the tarball: npm audit signatures.
 on:
   push:
-    tags: ["v*"]
+    # v* releases the component. create-v* releases the create-llms-txt front door.
+    tags: ["v*", "create-v*"]
 
 permissions:
   contents: read
@@ -56,34 +57,52 @@ jobs:
 
       - run: npm test
 
+      # Which package this tag is for. Keeping both in one repo means one source of truth
+      # for the install logic; the tag prefix is what picks the target.
+      - name: Pick the package from the tag
+        id: target
+        run: |
+          case "$GITHUB_REF_NAME" in
+            create-v*) DIR="create-llms-txt"; VERSION="${GITHUB_REF_NAME#create-v}" ;;
+            v*)        DIR="."              ; VERSION="${GITHUB_REF_NAME#v}" ;;
+            *)         echo "::error::unrecognised tag $GITHUB_REF_NAME"; exit 1 ;;
+          esac
+          echo "dir=$DIR" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "name=$(node -p "require('./$DIR/package.json').name")" >> "$GITHUB_OUTPUT"
+          echo "releasing $DIR at $VERSION"
+
       - name: Tag and package.json must agree
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          PKG="$(node -p "require('./package.json').version")"
-          if [ "$TAG" != "$PKG" ]; then
-            echo "::error::tag v$TAG does not match package.json $PKG"
+          PKG="$(node -p "require('./${{ steps.target.outputs.dir }}/package.json').version")"
+          if [ "${{ steps.target.outputs.version }}" != "$PKG" ]; then
+            echo "::error::tag says ${{ steps.target.outputs.version }}, package.json says $PKG"
             exit 1
           fi
 
       # No NODE_AUTH_TOKEN. If this line ever needs one again, trusted publishing has been
       # turned off on npmjs.com and that is the thing to fix, not this file.
+      #
+      # Each package needs its OWN trusted publisher entry on npmjs.com, both pointing at
+      # this repo and this workflow file.
       - run: npm publish
+        working-directory: ${{ steps.target.outputs.dir }}
 
       # A green publish step is not proof the release is fetchable: npm answers before the
       # registry serves it ("your package is being processed"). And provenance is what shows
       # the publish really came from this workflow rather than from somebody's token.
       - name: Confirm the registry actually has it, with provenance
+        env:
+          SPEC: ${{ steps.target.outputs.name }}@${{ steps.target.outputs.version }}
         run: |
-          VERSION="$(node -p "require('./package.json').version")"
           for i in $(seq 1 30); do
-            if npm view "human-machine-swapper@$VERSION" version >/dev/null 2>&1; then
-              echo "registry is serving $VERSION"
-              npm view "human-machine-swapper@$VERSION" dist.attestations \
-                || echo "::warning::no attestation reported for $VERSION"
+            if npm view "$SPEC" version >/dev/null 2>&1; then
+              echo "registry is serving $SPEC"
+              npm view "$SPEC" dist.attestations || echo "::warning::no attestation for $SPEC"
               exit 0
             fi
-            echo "waiting for the registry to serve $VERSION ($i)"
+            echo "waiting for the registry to serve $SPEC ($i)"
             sleep 10
           done
-          echo "::error::published, but the registry never served $VERSION"
+          echo "::error::published, but the registry never served $SPEC"
           exit 1
