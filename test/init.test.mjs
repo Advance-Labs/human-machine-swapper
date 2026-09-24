@@ -278,3 +278,52 @@ test("with no pages found it falls back to README headings", () => {
   assert.match(txt, /## Sections/);
   assert.match(txt, /- Install/);
 });
+
+/**
+ * A one-line <head> is the shape that broke the first real site this ran on. Inserting
+ * "before the line" put the link and script OUTSIDE the head, directly in <html>, which is
+ * broken markup written into somebody else's repo.
+ */
+test("a single-line head keeps the tags INSIDE it", () => {
+  const dir = fixture({
+    "index.html": `<!doctype html>
+<html>
+  <head><meta charset="utf-8" /><title>One Line</title></head>
+  <body><h1>Hi</h1></body>
+</html>
+`,
+  });
+  const f = detect(dir);
+  apply({ dir, framework: f, llmsTxt: "x", scriptTag: '<script src="s"></script>' });
+  const html = readFileSync(join(dir, "index.html"), "utf8");
+
+  const headOpen = html.indexOf("<head>");
+  const headClose = html.indexOf("</head>");
+  const link = html.indexOf('rel="llms"');
+  assert.ok(link > headOpen && link < headClose, "the link must be inside <head>");
+
+  const bodyOpen = html.indexOf("<body>");
+  const bodyClose = html.indexOf("</body>");
+  const el = html.indexOf("<human-machine-swapper");
+  assert.ok(el > bodyOpen && el < bodyClose, "the element must be inside <body>");
+});
+
+test("a multi-line head still gets the tags on their own lines", () => {
+  const dir = fixture({
+    "index.html": `<!doctype html>
+<html>
+  <head>
+    <title>Multi</title>
+  </head>
+  <body>
+    <h1>Hi</h1>
+  </body>
+</html>
+`,
+  });
+  const f = detect(dir);
+  apply({ dir, framework: f, llmsTxt: "x", scriptTag: '<script src="s"></script>' });
+  const html = readFileSync(join(dir, "index.html"), "utf8");
+  assert.match(html, /\n {4}<link rel="llms" href="\/llms\.txt" \/>\n/);
+  assert.ok(html.indexOf('rel="llms"') < html.indexOf("</head>"));
+});

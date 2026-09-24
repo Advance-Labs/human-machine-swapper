@@ -73,18 +73,27 @@ function insertBefore(source, marker, snippet) {
   const at = source.indexOf(marker);
   if (at === -1) return null;
   const lineStart = source.lastIndexOf("\n", at) + 1;
-  // The marker is a CLOSING tag, so its own indentation is the parent's. Children sit one
-  // level in, and every line of a multi-line snippet gets the same treatment or the
-  // continuation lines land wherever they happened to be authored.
-  const indent = source.slice(lineStart, at).match(/^\s*/)[0] + "  ";
-  // Keep the snippet's OWN relative indentation: a multi-line tag authors its attributes
-  // one level in and its closing bracket flush, and flattening that puts `></script>`
+  const before = source.slice(lineStart, at);
+  const indent = before.match(/^\s*/)[0];
+
+  // Indent every line of the snippet one level in from the closing tag, keeping the
+  // snippet's own relative indentation so a multi-line tag's `></script>` does not end up
   // deeper than the tag it closes.
   const body = snippet
     .split("\n")
-    .map((l) => (l.trim() ? indent + l : l))
+    .map((l) => (l.trim() ? indent + "  " + l : l))
     .join("\n");
-  return source.slice(0, lineStart) + body + "\n" + source.slice(lineStart);
+
+  // Two shapes, and getting this wrong writes broken HTML into somebody's repo.
+  //
+  // When the closing tag starts its own line, insert a line above it. When it does NOT -
+  // `<head><meta /><title>x</title></head>` all on one line - inserting "before the line"
+  // puts the tags OUTSIDE the element entirely, above <head>. That is what happened to the
+  // first Astro site this ran on. Split the line instead and keep the content inside.
+  if (before.trim() === "") {
+    return source.slice(0, lineStart) + body + "\n" + source.slice(lineStart);
+  }
+  return source.slice(0, at) + "\n" + body + "\n" + indent + source.slice(at);
 }
 
 /** Already installed? Then there is nothing to do and we say so instead of doubling up. */
