@@ -67,6 +67,30 @@ require_once __DIR__ . '/../human-machine-view/includes/class-hmv-generator.php'
 // ── assertions ─────────────────────────────────────────────────────────────────────────
 
 $failures = 0;
+
+/**
+ * The two string helpers below exist because their built-in equivalents are PHP 8.0 and
+ * this file must run on 7.4, the plugin's declared floor. Otherwise the suite quietly
+ * stops testing the version users are actually on. CI caught it on the first run, because
+ * it runs at the floor rather than at whatever the runner happens to ship.
+ *
+ * @param string $haystack Subject.
+ * @param string $needle   Search.
+ * @return bool
+ */
+function hmv_has( $haystack, $needle ) {
+	return false !== strpos( $haystack, $needle );
+}
+
+/**
+ * @param string $haystack Subject.
+ * @param string $needle   Prefix.
+ * @return bool
+ */
+function hmv_starts( $haystack, $needle ) {
+	return 0 === strncmp( $haystack, $needle, strlen( $needle ) );
+}
+
 function check( $label, $condition, $detail = '' ) {
 	global $failures;
 	if ( $condition ) {
@@ -97,22 +121,22 @@ $out = HMV_Generator::build(
 	)
 );
 
-check( 'starts with the site name as an h1', str_starts_with( $out, '# Harbour Cycles' ) );
-check( 'carries the one-line summary', str_contains( $out, '> A bike shop and repair co-op on the Halifax waterfront.' ) );
-check( 'lists a published page', str_contains( $out, '- [Repairs and servicing](https://harbourcycles.test/repairs)' ) );
-check( 'lists recent writing', str_contains( $out, '- [Winter tyre clinic](' ) );
-check( 'carries the owner key facts', str_contains( $out, 'Q: What are your hours?' ) );
+check( 'starts with the site name as an h1', hmv_starts( $out, '# Harbour Cycles' ) );
+check( 'carries the one-line summary', hmv_has( $out, '> A bike shop and repair co-op on the Halifax waterfront.' ) );
+check( 'lists a published page', hmv_has( $out, '- [Repairs and servicing](https://harbourcycles.test/repairs)' ) );
+check( 'lists recent writing', hmv_has( $out, '- [Winter tyre clinic](' ) );
+check( 'carries the owner key facts', hmv_has( $out, 'Q: What are your hours?' ) );
 
 // The three exclusions that stop the file stating things the site does not.
-check( 'excludes the privacy policy', ! str_contains( $out, 'Privacy Policy' ), 'boilerplate, not a machine reading' );
-check( 'skips an untitled page', ! str_contains( $out, '](https://harbourcycles.test/untitled)' ) );
-check( 'collapses whitespace in titles', str_contains( $out, '- [Join the co-op]' ) );
+check( 'excludes the privacy policy', ! hmv_has( $out, 'Privacy Policy' ), 'boilerplate, not a machine reading' );
+check( 'skips an untitled page', ! hmv_has( $out, '](https://harbourcycles.test/untitled)' ) );
+check( 'collapses whitespace in titles', hmv_has( $out, '- [Join the co-op]' ) );
 
 echo "\ngenerator, with nothing filled in\n";
 $bare = HMV_Generator::build( array( 'max_pages' => 40 ) );
-check( 'falls back to the tagline for the summary', str_contains( $bare, '> A bike shop and repair co-op in Halifax.' ) );
-check( 'admits the gap rather than inventing an About', str_contains( $bare, 'TODO' ), 'an invented About is worse than none' );
-check( 'omits Key facts entirely when empty', ! str_contains( $bare, '## Key facts' ) );
+check( 'falls back to the tagline for the summary', hmv_has( $bare, '> A bike shop and repair co-op in Halifax.' ) );
+check( 'admits the gap rather than inventing an About', hmv_has( $bare, 'TODO' ), 'an invented About is worse than none' );
+check( 'omits Key facts entirely when empty', ! hmv_has( $bare, '## Key facts' ) );
 
 echo "\ngenerator, with HTML pasted into the prose fields\n";
 $dirty = HMV_Generator::build(
@@ -121,8 +145,8 @@ $dirty = HMV_Generator::build(
 		'max_pages' => 40,
 	)
 );
-check( 'strips tags from owner prose', ! str_contains( $dirty, '<script>' ) && ! str_contains( $dirty, '<p>' ) );
-check( 'keeps the text', str_contains( $dirty, 'We fix bikes.' ) );
+check( 'strips tags from owner prose', ! hmv_has( $dirty, '<script>' ) && ! hmv_has( $dirty, '<p>' ) );
+check( 'keeps the text', hmv_has( $dirty, 'We fix bikes.' ) );
 
 echo "\ngenerator, page cap\n";
 $GLOBALS['hmv_test_pages'] = array();
