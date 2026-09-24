@@ -1,6 +1,6 @@
 {
   "name": "human-machine-swapper",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A web component that adds a Human / Machine pill to any website. Machine shows the site's llms.txt, the plain-text reading written for language models, rendered in place. One file, about 6 KB gzipped, no dependencies and no build step.",
   "keywords": [
     "llms.txt",
@@ -37,6 +37,7 @@
     "./package.json": "./package.json"
   },
   "files": [
+    "bin",
     "src",
     "llms.txt",
     "AGENTS.md",
@@ -52,5 +53,8 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "bin": {
+    "human-machine-swapper": "bin/cli.mjs"
   }
 }
