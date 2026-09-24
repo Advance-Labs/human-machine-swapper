@@ -254,13 +254,14 @@ and a Subresource Integrity hash:
 ```html
 <script
   src="https://unpkg.com/human-machine-swapper@1.0.0/src/human-machine-swapper.js"
-  integrity="sha384-REPLACE_WITH_THE_HASH_FOR_THIS_VERSION"
+  integrity="sha384-VetnLEfznYITII6EqUattgN+0Zd72RZXzBhdJjM/mAi6300cT3fUfvg7hN9JeMbH"
   crossorigin="anonymous"
   defer
 ></script>
 ```
 
-Generate the hash yourself, so you are trusting the bytes you checked rather than our word:
+That hash is for **1.0.0**. Every version has its own, so generate the one you are pinning —
+and generate it rather than taking ours, so you are trusting bytes you checked:
 
 ```bash
 curl -s https://unpkg.com/human-machine-swapper@1.0.0/src/human-machine-swapper.js \
