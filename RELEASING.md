@@ -51,6 +51,15 @@ The tag picks the target:
 Each package needs **its own** trusted publisher entry on npmjs.com, both pointing at this
 repo and `release.yml`.
 
+| Package | Trusted publisher | First publish |
+| --- | --- | --- |
+| `human-machine-swapper` | configured | done (token, since revoked) |
+| `create-llms-txt` | **not configured yet** | done 2026-09-24, manually |
+
+Until `create-llms-txt` has its entry, a `create-v*` tag will fail. Configure it the same
+way: its package page on npmjs.com, Settings, Trusted Publisher, `Advance-Labs` /
+`human-machine-swapper` / `release.yml`, environment blank.
+
 ## Trusted publishing cannot do a FIRST publish
 
 Confirmed by trying it, because npm's docs do not say. Tagging `create-v1.0.0` for a package
@@ -61,14 +70,23 @@ npm error 404 Not Found - PUT https://registry.npmjs.org/create-llms-txt
 ```
 
 There is no package for npm to match a trusted publisher against, and with no token in the
-workflow there is no other credential. So the sequence for any NEW package is:
+workflow there is no other credential.
 
-1. `npm login` in a real terminal, then `npm publish` from that package's directory, once.
-2. Configure its trusted publisher on npmjs.com.
+**And `npm login` alone is not enough.** This account requires a one-time password for
+publishes, so the publish itself fails with `npm error code EOTP` even when you are logged
+in. The browser flow it offers needs a real terminal; it cannot be completed from a tool
+that has no TTY.
+
+So the sequence for any NEW package is:
+
+1. In a **real terminal**, from that package's directory: `npm publish`. Complete the 2FA
+   prompt. This is the only step a person has to do.
+2. Configure its trusted publisher on npmjs.com, now that the package exists.
 3. Every release after that is a tag, with no credential anywhere.
 
 Do not paste a publish token into a chat window to shortcut step 1. That is how this
-project's first token ended up disclosed and needing revocation.
+project's first token ended up disclosed and needing revocation. An expiring OTP is a far
+smaller thing to share than a token, but running the one command yourself shares nothing.
 
 ## Trusted publishing needs Node ≥ 22.14.0 and npm ≥ 11.5.1
 
