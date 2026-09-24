@@ -327,3 +327,35 @@ test("a multi-line head still gets the tags on their own lines", () => {
   assert.match(html, /\n {4}<link rel="llms" href="\/llms\.txt" \/>\n/);
   assert.ok(html.indexOf('rel="llms"') < html.indexOf("</head>"));
 });
+
+// ── agent rule files ──────────────────────────────────────────────────────────────────
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const MANIFEST = JSON.parse(readFileSync(join(REPO_ROOT, "package.json"), "utf8"));
+
+
+/**
+ * These files exist to stop an agent improvising an install. If one of them drifts away
+ * from the two things that silently break a host site, it starts causing the problem it
+ * was written to prevent.
+ */
+test("every agent rules file names the command and the :defined guard", () => {
+  const files = [
+    "AGENTS.md",
+    "agent/cursor.mdc",
+    "agent/copilot-instructions.md",
+    "agent/claude-skill/SKILL.md",
+  ];
+  for (const f of files) {
+    const text = readFileSync(join(REPO_ROOT, f), "utf8");
+    assert.match(text, /npm create llms-txt|human-machine-swapper init/, `${f}: no command`);
+    assert.match(text, /human-machine-swapper:not\(:defined\)/, `${f}: no :defined guard`);
+    assert.match(text, /llms\.txt/, `${f}: never mentions llms.txt`);
+  }
+});
+
+test("the rules files are carried in the published tarball", () => {
+  assert.ok(MANIFEST.files.includes("agent"), "agent/ missing from package.json files");
+});

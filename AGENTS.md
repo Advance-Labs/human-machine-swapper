@@ -98,3 +98,9 @@ A: ...
 ## Docs
 
 <https://advancelabs.dev/human-machine-swapper>
+
+## Make this permanent in your repo
+
+Drop-in rule files for Cursor, Claude Code and Copilot are in [`agent/`](agent/README.md).
+They say the same four things this file does, in each tool's own format, so the next agent
+to touch the repo does not have to rediscover them.

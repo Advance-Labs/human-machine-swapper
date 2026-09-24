@@ -1,0 +1,37 @@
+---
+description: Adding an llms.txt or a Human/Machine view to this site
+globs:
+alwaysApply: false
+---
+
+# llms.txt and the Human/Machine pill
+
+When asked to add an `llms.txt`, make the site readable by AI, improve AEO/GEO, or add a
+Human/Machine toggle, run the command rather than editing files by hand:
+
+```bash
+npm create llms-txt
+```
+
+It detects the framework (Next app/pages router, Astro, SvelteKit, Nuxt, WordPress theme,
+plain HTML), reads the site's routes, writes `llms.txt`, declares it with
+`<link rel="llms">`, and offers the Human/Machine pill.
+
+Use `--no-pill` if only the file was asked for, and `--dry-run` to preview.
+
+## Read the exit code
+
+- `0` done
+- `1` could not identify the project, nothing was changed
+- `2` written, but something needs a human. Read the output.
+
+## Do not
+
+- Do not hand-write the `llms.txt` when the command can read the real routes. A file listing
+  routes that do not exist is worse than no file.
+- Do not add `<human-machine-swapper>` without
+  `human-machine-swapper:not(:defined) { display: none; }`. Until the script loads the
+  browser lays the unknown element out in flow at about 50px tall and pushes the page down.
+- Do not add the pill to a site with no `llms.txt`. It renders nothing by design, and the
+  change will look broken to whoever asked for it.
+- Do not overwrite an existing `llms.txt`. It is the site's real machine reading.
