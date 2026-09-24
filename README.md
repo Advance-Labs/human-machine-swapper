@@ -175,6 +175,46 @@ Add to your theme's `footer.php` before `</body>`, and the CSS to Customizer →
 | `data-labels-human` | text | Override the Human label. |
 | `data-labels-machine` | text | Override the Machine label. |
 
+### Positioning it yourself
+
+`data-position` picks an edge and a sensible inset. When that edge is occupied — a nav at the
+top, a tab bar at the bottom, which on a phone is often both — set the offsets yourself. These
+are custom properties, so they cross the shadow boundary and work from your own stylesheet:
+
+```css
+/* On phones this site has a 48px nav and a 58px bottom tab bar,
+   so neither default edge is free. Sit above the tab bar. */
+@media (max-width: 899px) {
+  human-machine-swapper {
+    --hms-top: auto;
+    --hms-bottom: 70px;
+  }
+}
+```
+
+| Property | Default |
+| --- | --- |
+| `--hms-top` | `calc(14px + env(safe-area-inset-top))` when `data-position="top-center"`, else `auto` |
+| `--hms-bottom` | `calc(20px + env(safe-area-inset-bottom))` when `data-position="bottom-center"`, else `auto` |
+
+Set both when you override, so the edge you are moving away from is released.
+
+### Hiding it during an intro animation
+
+The element is styled by the host page like any other, and outer styles win over the
+component's own. If your page has an opening sequence, hide it until that finishes:
+
+```css
+html.intro human-machine-swapper {
+  opacity: 0;
+  pointer-events: none;
+}
+```
+
+Only scope the rule to your loading state. If you set `opacity` unconditionally you override
+the component's own reveal, and the pill will appear before it knows whether it has anything
+to show.
+
 ---
 
 ## How it behaves

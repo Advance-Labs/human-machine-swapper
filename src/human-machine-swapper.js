@@ -175,8 +175,19 @@
           opacity: 0;
           transition: opacity 200ms ease;
         }
-        :host([data-position="top-center"]) { top: 14px; bottom: auto; }
-        :host([data-position="bottom-center"]) { bottom: 20px; top: auto; }
+        /* Host-positionable on purpose. A droppable control cannot know what chrome a site
+           has at each breakpoint: on a phone the top edge may be a nav and the bottom edge a
+           tab bar, leaving neither default usable. Custom properties cross the shadow
+           boundary, so the host sets --hms-top / --hms-bottom in its own media query and the
+           component stops guessing. env() keeps it off the notch and the home indicator. */
+        :host([data-position="top-center"]) {
+          top: var(--hms-top, calc(14px + env(safe-area-inset-top)));
+          bottom: var(--hms-bottom, auto);
+        }
+        :host([data-position="bottom-center"]) {
+          bottom: var(--hms-bottom, calc(20px + env(safe-area-inset-bottom)));
+          top: var(--hms-top, auto);
+        }
         :host([data-hms-state="ready"]) { opacity: 1; }
 
         /* Opaque, not blurred: this floats over copy on a page we do not control. */
