@@ -41,9 +41,32 @@ CI lints at **PHP 7.4**, the plugin's declared floor, not at whatever the runner
 Syntax that is fine on 8.x and fatal on 7.4 is precisely the failure a user hits and we
 would not.
 
-There is no full WordPress integration test. The stub covers the generator, which is where
-the logic is; the routing, enqueue and settings code is thin enough to read, and is the part
-to check by hand in a real install before any release.
+```bash
+npm run test:wp:integration    # boots a REAL WordPress and checks routing + front end
+```
+
+The integration run mounts the plugin into WordPress Playground and asserts the things that
+only break in a real install: that `/llms.txt` is served **without** a canonical redirect,
+as plain text with nosniff, built from the site's own pages, excluding password-protected
+ones, and that the front end declares the discovery link, mounts the element, enqueues the
+`:defined` guard and pins the script with an integrity hash.
+
+It is not in CI: it downloads WordPress and takes a couple of minutes, a poor trade against
+a fast suite. Run it before a release and any time the routing changes.
+
+⚠️ It writes its fixture through a mounted mu-plugin rather than a blueprint `runPHP` step,
+because that step was silently skipped on some boots. A skipped seed is worse than a failed
+one: the suite then tests an unseeded site and reports whatever that produces. A cached
+Playground directory made exactly that look like a pass once.
+
+## Assets
+
+`assets/` holds what WordPress.org renders on the listing: `banner-1544x500.png` and its
+772x250 downsample, `icon-256x256.png` and its 128x128, and the three screenshots. The
+banner and icon are rendered from HTML in the repo's history at 2x and downsampled, so the
+pair cannot drift apart.
+
+Screenshots were captured against a real WordPress, not mocked.
 
 ## Publishing to the plugin directory
 

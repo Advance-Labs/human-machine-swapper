@@ -50,7 +50,8 @@
   "sideEffects": true,
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "test:wp": "php wordpress/test/generator-test.php"
+    "test:wp": "php wordpress/test/generator-test.php",
+    "test:wp:integration": "node wordpress/test/integration.mjs"
   },
   "engines": {
     "node": ">=18"
