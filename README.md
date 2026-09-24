@@ -16,6 +16,20 @@ and one custom element.
 
 ## Install
 
+### One command
+
+```bash
+npx human-machine-swapper init
+```
+
+Detects your framework, writes a starter `llms.txt` if you have none, declares it, loads the
+component **pinned to a version with an integrity hash**, mounts the element, and adds the
+`:not(:defined)` guard below. Idempotent, never overwrites an existing `llms.txt`, and
+`--dry-run` shows the changes without making them.
+
+Knows Next (app and pages router), Astro, SvelteKit, Nuxt, WordPress themes and plain HTML.
+If it cannot identify your project it changes nothing and prints the manual steps.
+
 ### Script tag
 
 ```html
@@ -38,7 +52,8 @@ import "human-machine-swapper";
 
 ## Required setup
 
-Three things. Skip any one of them and the pill will not appear, or will appear broken.
+Three things. `init` does all of them; this is what it is doing, and what to do by hand.
+Skip any one and the pill will not appear, or will appear broken.
 
 ### 1. Publish an `llms.txt`
 

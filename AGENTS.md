@@ -7,7 +7,27 @@ Instructions for coding agents adding this component to a site.
 A dependency-free web component that adds a Human / Machine pill. Machine shows the site's
 `llms.txt` rendered in place. One script tag, one custom element, no build step.
 
-## Install it in three steps, all three required
+## Do this first
+
+```bash
+npx human-machine-swapper init
+```
+
+It detects the framework, writes a starter `llms.txt` if the site has none, declares it,
+loads the component pinned to a version with an integrity hash, mounts the element, and adds
+the `:not(:defined)` guard. It is idempotent, so running it twice is safe, and it never
+overwrites an existing `llms.txt`.
+
+Add `--dry-run` to see the changes without writing them.
+
+**Read the output.** It reports anything it could not work out rather than guessing, and it
+tells you how many `TODO`s are left in the generated `llms.txt`. Exit codes: `0` installed,
+`1` could not identify the project, `2` installed but something needs a human.
+
+If the command cannot identify the project, or you are editing a site by hand, the install
+is these three things plus one CSS rule.
+
+## By hand, if you have to
 
 1. **Load the script.**
 
@@ -30,8 +50,8 @@ A dependency-free web component that adds a Human / Machine pill. Machine shows 
    human-machine-swapper:not(:defined) { display: none; }
    ```
 
-   Without it, the element is laid out in flow at ~50px tall until the script loads and pushes
-   the rest of the page down.
+   Without it, the element is laid out in flow at ~50px tall until the script loads and
+   pushes the rest of the page down.
 
 ## The site must have an llms.txt
 

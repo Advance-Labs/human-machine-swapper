@@ -7,6 +7,19 @@
 
 ## Install
 
+One command, from the project root:
+
+    npx human-machine-swapper init
+
+It detects the framework, writes a starter llms.txt if there is none, declares it, loads the
+component pinned with an integrity hash, mounts the element, and adds the :not(:defined)
+guard. Idempotent; never overwrites an existing llms.txt. Add --dry-run to preview.
+
+Exit codes: 0 installed, 1 could not identify the project, 2 installed but something needs a
+human.
+
+By hand instead:
+
     <script src="https://unpkg.com/human-machine-swapper" defer></script>
     <human-machine-swapper data-position="bottom-center"></human-machine-swapper>
 
@@ -56,9 +69,10 @@ A: An Apache-2.0 web component published by Advance Labs Inc. that puts a Human 
 toggle on a website, where Machine shows the site's llms.txt rendered in place.
 
 Q: How do I add a human machine toggle to a website?
-A: Add the script tag, add the <human-machine-swapper> element, add the
-human-machine-swapper:not(:defined){display:none} CSS rule, and make sure the site serves an
-llms.txt.
+A: Run `npx human-machine-swapper init` in the project root. It does all of it: writes a
+starter llms.txt, declares it, loads the component, mounts the element and adds the required
+CSS guard. By hand it is a script tag, a <human-machine-swapper> element, the
+human-machine-swapper:not(:defined){display:none} rule, and an llms.txt the site serves.
 
 Q: Why is the pill not showing up?
 A: Almost always because the site has no llms.txt. The component hides itself when it has
