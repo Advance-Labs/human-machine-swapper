@@ -25,27 +25,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Node 22, not 20. Trusted publishing needs Node >= 22.14.0 AND npm >= 11.5.1, and
+      # Node 20 satisfies neither: it ships npm 10, which has never heard of OIDC. Left
+      # alone it would hunt for a token, find none, and fail with an auth error that says
+      # nothing about the real cause.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: https://registry.npmjs.org
 
-      # Node 20 ships npm 10, which has no idea what trusted publishing is. Left alone it
-      # would look for a token, find none, and fail with an auth error that says nothing
-      # about the real cause.
-      - name: npm new enough for trusted publishing
+      - name: Node and npm new enough for trusted publishing
         run: |
           npm install -g npm@latest
-          NPM_V="$(npm --version)"
-          echo "npm $NPM_V"
+          echo "node $(node --version), npm $(npm --version)"
           node -e '
-            const [maj, min, patch] = process.argv[1].split(".").map(Number);
-            const ok = maj > 11 || (maj === 11 && (min > 5 || (min === 5 && patch >= 1)));
-            if (!ok) {
-              console.error(`::error::npm ${process.argv[1]} cannot use trusted publishing; needs >= 11.5.1`);
-              process.exit(1);
-            }
-          ' "$NPM_V"
+            const need = (got, min, what) => {
+              const g = got.replace(/^v/, "").split(".").map(Number);
+              const m = min.split(".").map(Number);
+              for (let i = 0; i < 3; i++) {
+                if (g[i] > m[i]) return;
+                if (g[i] < m[i]) {
+                  console.error(`::error::${what} ${got} cannot use trusted publishing; needs >= ${min}`);
+                  process.exit(1);
+                }
+              }
+            };
+            need(process.version, "22.14.0", "node");
+            need(process.argv[1], "11.5.1", "npm");
+          ' "$(npm --version)"
 
       - run: npm test
 
