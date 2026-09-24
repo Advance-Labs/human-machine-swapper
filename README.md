@@ -268,6 +268,20 @@ curl -s https://unpkg.com/human-machine-swapper@1.0.0/src/human-machine-swapper.
   | openssl dgst -sha384 -binary | openssl base64 -A
 ```
 
+### Provenance
+
+From 1.0.2 this package is published by GitHub Actions through npm's trusted publishing, with
+no long-lived token anywhere. Every release carries a signed attestation naming the commit and
+the workflow that built it, so you can check the tarball came from this repo rather than from
+somebody's credentials:
+
+```bash
+npm audit signatures
+```
+
+That is a stronger claim than an integrity hash. A hash says the bytes did not change in
+transit; the attestation says where the bytes came from.
+
 A pinned build does not update, so you take on watching for releases. Self-hosting the file is
 the third option and works identically: it is one dependency-free script with no network calls
 of its own beyond reading your `llms.txt`.
