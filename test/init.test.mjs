@@ -203,3 +203,78 @@ test("dry run writes nothing", () => {
   assert.equal(readFileSync(join(dir, "index.html"), "utf8"), before);
   assert.equal(existsSync(join(dir, "llms.txt")), false);
 });
+
+// ── page discovery ────────────────────────────────────────────────────────────────────
+import { findPages } from "../src/init/pages.mjs";
+
+function nextApp(pages) {
+  const files = {
+    "next.config.mjs": "export default {};",
+    "app/layout.jsx": NEXT_LAYOUT,
+    "app/globals.css": "body{}",
+  };
+  Object.assign(files, pages);
+  return fixture(files);
+}
+
+test("finds routes and reads their titles from metadata, h1 or the slug", () => {
+  const dir = nextApp({
+    "app/page.jsx": 'export const metadata = { title: "Northfield Dental" };',
+    "app/about/page.jsx": 'export const metadata = { title: "About our practice" };',
+    "app/services/aeo/page.jsx": "export default function P(){return <h1>AEO audits</h1>}",
+    "app/contact/page.jsx": "export default function P(){return null}",
+  });
+  const pages = findPages(dir, detect(dir));
+  const byRoute = Object.fromEntries(pages.map((p) => [p.route, p.title]));
+  assert.equal(byRoute["/"], "Northfield Dental");
+  assert.equal(byRoute["/about"], "About our practice");
+  assert.equal(byRoute["/services/aeo"], "AEO audits");
+  assert.equal(byRoute["/contact"], "Contact", "falls back to the slug, titleised");
+});
+
+/** A template is not a page. Listing /blog/[slug] in an llms.txt helps nobody. */
+test("dynamic routes are left out", () => {
+  const dir = nextApp({
+    "app/page.jsx": "export default function P(){return null}",
+    "app/blog/[slug]/page.jsx": "export default function P(){return null}",
+  });
+  const routes = findPages(dir, detect(dir)).map((p) => p.route);
+  assert.deepEqual(routes, ["/"]);
+});
+
+/** Route groups are organisational. (marketing)/pricing is served at /pricing. */
+test("route groups are stripped from the url", () => {
+  const dir = nextApp({
+    "app/page.jsx": "export default function P(){return null}",
+    "app/(marketing)/pricing/page.jsx": 'export const metadata={title:"Pricing"}',
+  });
+  const routes = findPages(dir, detect(dir)).map((p) => p.route);
+  assert.ok(routes.includes("/pricing"), `got ${routes.join(", ")}`);
+  assert.ok(!routes.some((r) => r.includes("(")), "a route group must not reach the url");
+});
+
+test("build output and dependencies are never walked", () => {
+  const dir = nextApp({
+    "app/page.jsx": "export default function P(){return null}",
+    ".next/server/app/ghost/page.js": "compiled",
+    "node_modules/thing/app/other/page.jsx": "vendored",
+  });
+  const routes = findPages(dir, detect(dir)).map((p) => p.route);
+  assert.deepEqual(routes, ["/"], `leaked: ${routes.join(", ")}`);
+});
+
+test("pages land in the generated llms.txt, and beat README headings", () => {
+  const txt = buildLlmsTxt(
+    { name: "Acme", headings: ["Ignored heading"] },
+    { pages: [{ route: "/about", title: "About" }] }
+  );
+  assert.match(txt, /## Pages/);
+  assert.match(txt, /- \[About\]\(\/about\)/);
+  assert.doesNotMatch(txt, /Ignored heading/);
+});
+
+test("with no pages found it falls back to README headings", () => {
+  const txt = buildLlmsTxt({ name: "Acme", headings: ["Install"] }, { pages: [] });
+  assert.match(txt, /## Sections/);
+  assert.match(txt, /- Install/);
+});

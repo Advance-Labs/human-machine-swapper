@@ -12,7 +12,7 @@
 
 const TODO = "TODO";
 
-export function buildLlmsTxt(facts = {}, { framework } = {}) {
+export function buildLlmsTxt(facts = {}, { framework, pages } = {}) {
   const name = facts.name || "This site";
   const summary = facts.description || `${TODO}: one sentence on what this site is.`;
 
@@ -30,7 +30,15 @@ export function buildLlmsTxt(facts = {}, { framework } = {}) {
   }
   lines.push("");
 
-  if (facts.headings && facts.headings.length) {
+  // The pages are the point. A file built from a README says what the project calls
+  // itself; one built from the routes says what is ON the site, which is what a model
+  // needs to answer "where do I find X".
+  if (pages && pages.length) {
+    lines.push("## Pages");
+    lines.push("");
+    for (const p of pages) lines.push(`- [${p.title}](${p.route})`);
+    lines.push("");
+  } else if (facts.headings && facts.headings.length) {
     lines.push("## Sections");
     lines.push("");
     for (const h of facts.headings) lines.push(`- ${h}`);

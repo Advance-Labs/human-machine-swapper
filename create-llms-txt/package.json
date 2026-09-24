@@ -1,0 +1,49 @@
+{
+  "name": "create-llms-txt",
+  "version": "1.0.0",
+  "description": "Write an llms.txt for your site in one command. Reads your routes, so the file lists what is actually on the site. Optionally adds a Human/Machine pill so visitors can read it too.",
+  "keywords": [
+    "llms.txt",
+    "llmstxt",
+    "aeo",
+    "geo",
+    "answer-engine-optimization",
+    "generative-engine-optimization",
+    "ai-search",
+    "ai-seo",
+    "llm",
+    "agents",
+    "machine-readable",
+    "seo",
+    "generator",
+    "scaffold"
+  ],
+  "homepage": "https://advancelabs.dev/human-machine-swapper",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Advance-Labs/human-machine-swapper.git",
+    "directory": "create-llms-txt"
+  },
+  "bugs": {
+    "url": "https://github.com/Advance-Labs/human-machine-swapper/issues"
+  },
+  "license": "Apache-2.0",
+  "author": "Advance Labs Inc. (https://advancelabs.dev)",
+  "type": "module",
+  "bin": {
+    "create-llms-txt": "index.mjs"
+  },
+  "files": [
+    "index.mjs",
+    "README.md"
+  ],
+  "dependencies": {
+    "human-machine-swapper": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
