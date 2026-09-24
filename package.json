@@ -48,7 +48,8 @@
   ],
   "sideEffects": true,
   "scripts": {
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "test:wp": "php wordpress/test/generator-test.php"
   },
   "engines": {
     "node": ">=18"
