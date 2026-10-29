@@ -4,7 +4,7 @@ Tags: llms.txt, ai search, seo, aeo, chatgpt
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: Apache-2.0
 License URI: https://www.apache.org/licenses/LICENSE-2.0
 
@@ -87,6 +87,9 @@ Yes, and open source under Apache-2.0. No account, no upsell, no data sent anywh
 3. The optional Human / Machine pill, showing the machine reading in place.
 
 == Changelog ==
+
+= 1.0.1 =
+* Loads the Human/Machine component 1.4.2 (was 1.3.0). The Machine reader now works on sites behind a login, such as staging or preview sites, and only reads the llms.txt link from the page head.
 
 = 1.0.0 =
 * First release. Serves llms.txt from your published pages, adds the discovery link, and optionally shows the Human/Machine pill.

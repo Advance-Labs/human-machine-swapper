@@ -3,7 +3,7 @@
  * Plugin Name:       Human/Machine View — llms.txt for WordPress
  * Plugin URI:        https://advancelabs.dev/human-machine-swapper
  * Description:       Serves an llms.txt built from your own pages, so AI assistants read what you actually publish. Optionally adds a Human / Machine toggle so visitors can see it too.
- * Version:           1.0.0
+ * Version:           1.0.1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Advance Labs
@@ -36,10 +36,10 @@ define( 'HMV_OPTION', 'hmv_settings' );
 define( 'HMV_CACHE_KEY', 'hmv_llms_txt' );
 
 /** The component, pinned. A floating CDN url cannot carry an integrity hash. */
-define( 'HMV_COMPONENT_VERSION', '1.3.0' );
+define( 'HMV_COMPONENT_VERSION', '1.4.2' );
 define(
 	'HMV_COMPONENT_SRI',
-	'sha384-VetnLEfznYITII6EqUattgN+0Zd72RZXzBhdJjM/mAi6300cT3fUfvg7hN9JeMbH'
+	'sha384-RHtUnGjGVEmRCkTkaHPNSKNq44cw85EyD1830mDBQhjGEOO001OMa0gcI586klsL'
 );
 
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-hmv-generator.php';
