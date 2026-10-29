@@ -120,3 +120,9 @@ test("it sends cookies to its own origin, so the reader works behind a login", (
   assert.equal((SOURCE.match(/credentials:\s*"same-origin"/g) || []).length, 2);
 });
 
+test("the discovery link is read from <head> only", () => {
+  // The reader fetches that URL with same-origin cookies; body markup must not choose it.
+  assert.ok(/document\.head\.querySelector\('link\[rel="llms"\]'\)/.test(SOURCE));
+  assert.ok(!/document\.querySelector\('link\[rel="llms"\]'\)/.test(SOURCE));
+});
+
