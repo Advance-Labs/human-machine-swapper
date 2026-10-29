@@ -49,7 +49,9 @@
   }
 
   function linkedHref() {
-    const link = document.querySelector('link[rel="llms"]');
+    // <head> only: the reader fetches this URL with same-origin cookies, so markup that page
+    // content can inject (a <link> in the body) must not be able to choose it.
+    const link = document.head && document.head.querySelector('link[rel="llms"]');
     return link ? link.getAttribute("href") : null;
   }
 

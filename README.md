@@ -86,6 +86,9 @@ See <https://llmstxt.org> for the convention.
 
 ### 2. Point at it
 
+In your page's `<head>` (a `<link>` in the body is ignored, so page content can't redirect the
+reader):
+
 ```html
 <link rel="llms" href="/llms.txt" />
 ```
