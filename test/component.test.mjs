@@ -112,3 +112,11 @@ test("package.json points at the manifest and ships it", () => {
   assert.equal(PKG.customElements, "custom-elements.json");
   assert.ok(PKG.files.includes("custom-elements.json"));
 });
+
+test("it sends cookies to its own origin, so the reader works behind a login", () => {
+  // With credentials: "omit", a password-protected deployment (e.g. a Vercel preview) sent the
+  // fetch to its login page, the reader failed, and Machine fell back to the raw file.
+  assert.ok(!/credentials:\s*"omit"/.test(SOURCE), "no fetch may drop same-origin cookies");
+  assert.equal((SOURCE.match(/credentials:\s*"same-origin"/g) || []).length, 2);
+});
+
