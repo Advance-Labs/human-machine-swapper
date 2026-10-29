@@ -71,7 +71,10 @@
 
     for (const path of PROBE_PATHS) {
       try {
-        const response = await fetch(path, { method: "HEAD", credentials: "omit" });
+        // same-origin, not omit: behind a login (a Vercel preview, an intranet) a cookieless
+        // request is bounced to the login page, the probe fails, and the pill never appears.
+        // Cookies still never go to another origin.
+        const response = await fetch(path, { method: "HEAD", credentials: "same-origin" });
         if (response.ok) {
           try {
             window.sessionStorage.setItem(cacheKey, path);
@@ -472,7 +475,9 @@
 
       if (!this._text) {
         try {
-          const response = await fetch(href, { credentials: "omit" });
+          // same-origin: see the probe above. With "omit", a protected deployment bounced this
+          // to its login page, the fetch failed, and the reader fell back to the raw file.
+          const response = await fetch(href, { credentials: "same-origin" });
           if (!response.ok) throw new Error(String(response.status));
           this._text = await response.text();
         } catch (error) {
