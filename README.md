@@ -1,5 +1,7 @@
 # Human/Machine view
 
+[![MCP servers live](https://whobuildsagents.com/badge/advancelabs.dev.svg)](https://whobuildsagents.com/advancelabs.dev)
+
 A web component that puts a **Human / Machine** pill on any website. Machine shows the site's
 `llms.txt` — the plain-text reading written for language models — rendered in place, without
 leaving the page. One file, about 6 KB gzipped.
