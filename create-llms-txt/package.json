@@ -1,6 +1,6 @@
 {
   "name": "create-llms-txt",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Write an llms.txt for your site in one command. Reads your routes, so the file lists what is actually on the site. Optionally adds a Human/Machine pill so visitors can read it too.",
   "keywords": [
     "llms.txt",
@@ -18,7 +18,7 @@
     "generator",
     "scaffold"
   ],
-  "homepage": "https://advancelabs.dev/human-machine-swapper",
+  "homepage": "https://advancelabs.dev/tools/llms-txt",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Advance-Labs/human-machine-swapper.git",
