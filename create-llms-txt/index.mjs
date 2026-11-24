@@ -181,6 +181,7 @@ The convention: https://llmstxt.org`);
     console.log(`\n${C.y}Needs you:${C.x}`);
     for (const a of needsHuman) console.log(`  ! ${a.what}: ${a.note}`);
   }
+  console.log(`\nCheck how AI assistants read your site: https://advancelabs.dev/tools/audit?utm_source=create-llms-txt&utm_medium=cli`);
   process.exit(needsHuman.length ? 2 : 0);
 }
 
